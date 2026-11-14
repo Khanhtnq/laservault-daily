@@ -19,5 +19,9 @@
   "dependencies": {
     "@devvit/public-api": "^0.11.0"
   },
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2"
+  }
 }
