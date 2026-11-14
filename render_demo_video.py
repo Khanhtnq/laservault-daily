@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import shutil
 import math
 from PIL import Image, ImageDraw, ImageFont
 
@@ -285,7 +286,12 @@ for f in range(TOTAL_FRAMES):
 
 print("All frames rendered. Encoding with ffmpeg...")
 
-ffmpeg_path = r"C:\Users\ADMIN\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-8.1.1-full_build\bin\ffmpeg.exe"
+ffmpeg_path = shutil.which("ffmpeg") or os.environ.get("FFMPEG_PATH") or "ffmpeg"
+if not shutil.which(ffmpeg_path):
+    local_app_data = os.environ.get("LOCALAPPDATA", "")
+    candidate = os.path.join(local_app_data, "Microsoft", "WinGet", "Packages", "Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe", "ffmpeg-8.1.1-full_build", "bin", "ffmpeg.exe")
+    if os.path.exists(candidate):
+        ffmpeg_path = candidate
 out_video = "assets/demo_1080p.mp4"
 docs_video = "docs/demo_1080p.mp4"
 
