@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>LaserVault Daily — Reddit Optics Tactical Heist</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background: radial-gradient(circle at 50% 20%, #0d131f 0%, #05070a 100%);
+            color: #e0f2fe;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 12px;
+            overflow-x: hidden;
+        }
+
+        header {
+            width: 100%;
+            max-width: 520px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .title-block {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, #38bdf8, #818cf8, #f43f5e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .date-seed {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            font-mono: monospace;
+        }
+
+        .stats-badge {
+            display: flex;
+            gap: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            padding: 4px 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .badge-flame { color: #f97316; }
+        .badge-moves { color: #38bdf8; }
+
+        #canvas-container {
+            position: relative;
+            width: 100%;
+            max-width: 480px;
+            aspect-ratio: 1 / 1;
+            margin: 6px 0;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 0 35px rgba(56, 189, 248, 0.15), inset 0 0 20px rgba(0,0,0,0.8);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            background: #020617;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            touch-action: none;
+        }
+
+        .controls {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 10px 14px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-secondary {
+            background: #1e293b;
+            color: #cbd5e1;
+            border: 1px solid #334155;
+        }
+
+        .btn-secondary:hover {
+            background: #334155;
+            color: #ffffff;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0284c7, #6366f1);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0369a1, #4f46e5);
+            transform: translateY(-1px);
+        }
+
+        /* Victory Modal */
+        #victory-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .modal-card {
+            background: #0f172a;
+            border: 2px solid #38bdf8;
+            border-radius: 20px;
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(56, 189, 248, 0.4);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-title {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: #38bdf8;
+            margin-bottom: 6px;
+        }
+
+        .modal-subtitle {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-bottom: 16px;
+        }
+
+        .emoji-grid-box {
+            background: #020617;
+            border: 1px solid #1e293b;
+            padding: 12px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 1rem;
+            white-space: pre-line;
+            margin-bottom: 16px;
+            line-height: 1.3;
+            letter-spacing: 2px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            background: #22c55e;
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="title-block">
+            <div class="title">LaserVault ⚡ Daily</div>
+            <div class="date-seed" id="date-seed-label">SEED: 2026-11-14</div>
+        </div>
+        <div class="stats-badge">
+            <div class="badge badge-moves">
+                <span>🔄</span> <span id="moves-label">0</span>
+            </div>
+            <div class="badge badge-flame">
+                <span>🔥</span> <span id="streak-label">1</span>
+            </div>
+        </div>
+    </header>
+
+    <div id="canvas-container">
+        <canvas id="gameCanvas" width="480" height="480"></canvas>
+    </div>
+
+    <div class="controls">
+        <button class="btn-secondary" id="btn-reset">↺ Reset</button>
+        <button class="btn-secondary" id="btn-solve-hint">💡 Hint</button>
+        <button class="btn-primary" id="btn-share">📋 Share Daily</button>
+    </div>
+
+    <!-- Victory Overlay -->
+    <div id="victory-modal">
+        <div class="modal-card">
+            <div class="modal-title">VAULT BREACHED! 💎</div>
+            <div class="modal-subtitle">Optics aligned cleanly. Security node cracked.</div>
+            <div class="emoji-grid-box" id="share-grid-preview"></div>
+            <button class="btn-primary" id="btn-copy-reddit" style="width: 100%; margin-bottom: 8px;">
+                📋 Copy Reddit Comment Post
+            </button>
+            <button class="btn-secondary" id="btn-close-modal" style="width: 100%;">
+                Close & View Grid
+            </button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Copied to clipboard!</div>
+
+    <script type="module">
+        import { LaserVaultPuzzle, CELL_TYPES, DIRS } from './game_engine.js';
+
+        // Sound synthesizer via WebAudio API (zero external assets)
+        class SynthAudio {
+            constructor() {
+                this.ctx = null;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+
+            playRotate() {
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(440, now);
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.08);
+                gain.gain.setValueAtTime(0.12, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.09);
+            }
+
+            playBreach() {
+                this.init();
+                const now = this.ctx.currentTime;
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.08);
+                    gain.gain.setValueAtTime(0.2, now + i * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.3);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + i * 0.08);
+                    osc.stop(now + i * 0.08 + 0.35);
+                });
+            }
+        }
+
+        const audio = new SynthAudio();
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Current UTC Date String
+        const nowUtc = new Date();
+        const todayStr = nowUtc.toISOString().slice(0, 10);
+        document.getElementById('date-seed-label').textContent = `SEED: ${todayStr}`;
+
+        let puzzle = new LaserVaultPuzzle(todayStr);
+        let moves = 0;
+        let streak = parseInt(localStorage.getItem('laservault_streak') || '1', 10);
+        document.getElementById('streak-label').textContent = streak;
+
+        let hasWon = false;
+        let animPhase = 0;
+
+        function getCellSize() {
+            return canvas.width / puzzle.width;
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const cs = getCellSize();
+
+            // Grid background & subtle tech grid lines
+            ctx.strokeStyle = 'rgba(30, 41, 59, 0.4)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= puzzle.width; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * cs, 0);
+                ctx.lineTo(i * cs, canvas.height);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(0, i * cs);
+                ctx.lineTo(canvas.width, i * cs);
+                ctx.stroke();
+            }
+
+            // Draw cells
+            for (let y = 0; y < puzzle.height; y++) {
+                for (let x = 0; x < puzzle.width; x++) {
+                    const cell = puzzle.grid[y][x];
+                    const cx = x * cs + cs / 2;
+                    const cy = y * cs + cs / 2;
+
+                    if (cell.type === CELL_TYPES.BLOCK) {
+                        ctx.fillStyle = '#1e293b';
+                        ctx.fillRect(x * cs + 4, y * cs + 4, cs - 8, cs - 8);
+                        ctx.strokeStyle = '#475569';
+                        ctx.strokeRect(x * cs + 4, y * cs + 4, cs - 8, cs - 8);
+                    } else if (cell.type === CELL_TYPES.EMITTER) {
+                        ctx.fillStyle = '#06b6d4';
+                        ctx.beginPath();
+                        ctx.arc(cx, cy, cs * 0.28, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.strokeStyle = '#ffffff';
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                    } else if (cell.type === CELL_TYPES.TARGET) {
+                        ctx.save();
+                        ctx.fillStyle = cell.hit ? '#10b981' : '#f43f5e';
+                        ctx.shadowColor = cell.hit ? '#34d399' : '#fb7185';
+                        ctx.shadowBlur = cell.hit ? 18 : 6;
+                        ctx.beginPath();
+                        ctx.arc(cx, cy, cs * 0.30, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.restore();
+
+                        // Target Core Ring
+                        ctx.strokeStyle = '#ffffff';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.arc(cx, cy, cs * 0.15, 0, Math.PI * 2);
+                        ctx.stroke();
+                    } else if (cell.type === CELL_TYPES.MIRROR) {
+                        ctx.save();
+                        ctx.translate(cx, cy);
+                        // Subtle mirror pod base
+                        ctx.fillStyle = 'rgba(56, 189, 248, 0.08)';
+                        ctx.beginPath();
+                        ctx.arc(0, 0, cs * 0.38, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.strokeStyle = 'rgba(56, 189, 248, 0.3)';
+                        ctx.stroke();
+
+                        // Mirror diagonal bar
+                        // rot 0: '/'  (from bottom-left to top-right)
+                        // rot 1: '\'  (from top-left to bottom-right)
+                        ctx.lineWidth = 5;
+                        ctx.lineCap = 'round';
+                        ctx.strokeStyle = '#38bdf8';
+                        ctx.shadowColor = '#0284c7';
+                        ctx.shadowBlur = 10;
+                        ctx.beginPath();
+                        const len = cs * 0.32;
+                        if (cell.rotation === 0) { // /
+                            ctx.moveTo(-len, len);
+                            ctx.lineTo(len, -len);
+                        } else { // \
+                            ctx.moveTo(-len, -len);
+                            ctx.lineTo(len, len);
+                        }
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                }
+            }
+
+            // Draw Lasers
+            if (puzzle.beamSegments) {
+                ctx.save();
+                ctx.lineWidth = 3.5;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = '#22d3ee';
+                ctx.shadowColor = '#00f0ff';
+                ctx.shadowBlur = 14;
+
+                for (const seg of puzzle.beamSegments) {
+                    ctx.beginPath();
+                    ctx.moveTo(seg.x1 * cs + cs / 2, seg.y1 * cs + cs / 2);
+                    ctx.lineTo(seg.x2 * cs + cs / 2, seg.y2 * cs + cs / 2);
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            animPhase += 0.05;
+            requestAnimationFrame(render);
+        }
+
+        requestAnimationFrame(render);
+
+        // Click / Touch Handler
+        canvas.addEventListener('pointerdown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+            const cs = rect.width / puzzle.width;
+            const cellX = Math.floor(clickX / cs);
+            const cellY = Math.floor(clickY / cs);
+
+            if (puzzle.rotateCell(cellX, cellY)) {
+                audio.playRotate();
+                moves++;
+                document.getElementById('moves-label').textContent = moves;
+
+                // Send message to Devvit Webview parent if inside Reddit
+                if (window.parent && window.parent.postMessage) {
+                    window.parent.postMessage({ type: 'MOVE_ACTION', moves, date: todayStr }, '*');
+                }
+
+                if (puzzle.isVaultUnlocked() && !hasWon) {
+                    hasWon = true;
+                    audio.playBreach();
+                    onVictory();
+                }
+            }
+        });
+
+        function buildEmojiGrid() {
+            let gridText = `LaserVault Daily ${todayStr} ⚡\n`;
+            gridText += `Breached in ${moves} moves (Par: ${puzzle.parMoves}) 💎\n`;
+            gridText += `Streak: ${streak} 🔥\n\n`;
+
+            for (let y = 0; y < puzzle.height; y++) {
+                let row = '';
+                for (let x = 0; x < puzzle.width; x++) {
+                    const c = puzzle.grid[y][x];
+                    if (c.type === CELL_TYPES.TARGET) row += '🎯';
+                    else if (c.type === CELL_TYPES.EMITTER) row += '🔆';
+                    else if (c.type === CELL_TYPES.MIRROR) row += '🪞';
+                    else if (c.type === CELL_TYPES.BLOCK) row += '⬛';
+                    else row += '🟦';
+                }
+                gridText += row + '\n';
+            }
+            gridText += '\nPlay: reddit.com/r/LaserVaultDaily';
+            return gridText;
+        }
+
+        function onVictory() {
+            streak++;
+            localStorage.setItem('laservault_streak', streak);
+            document.getElementById('streak-label').textContent = streak;
+
+            const emojiGrid = buildEmojiGrid();
+            document.getElementById('share-grid-preview').textContent = emojiGrid;
+            document.getElementById('victory-modal').style.display = 'flex';
+
+            if (window.parent && window.parent.postMessage) {
+                window.parent.postMessage({
+                    type: 'VICTORY',
+                    moves: moves,
+                    par: puzzle.parMoves,
+                    streak: streak,
+                    date: todayStr
+                }, '*');
+            }
+        }
+
+        function showToast(text) {
+            const toast = document.getElementById('toast');
+            toast.textContent = text;
+            toast.style.opacity = '1';
+            setTimeout(() => { toast.style.opacity = '0'; }, 2200);
+        }
+
+        // Button Listeners
+        document.getElementById('btn-reset').addEventListener('click', () => {
+            puzzle = new LaserVaultPuzzle(todayStr);
+            moves = 0;
+            hasWon = false;
+            document.getElementById('moves-label').textContent = moves;
+        });
+
+        document.getElementById('btn-solve-hint').addEventListener('click', () => {
+            const res = puzzle.solveBFS();
+            if (res.solvable) {
+                // Apply first step
+                for (let i = 0; i < puzzle.rotatables.length; i++) {
+                    const r = puzzle.rotatables[i];
+                    if (puzzle.grid[r.y][r.x].rotation !== res.solution[i]) {
+                        puzzle.grid[r.y][r.x].rotation = res.solution[i];
+                        puzzle.simulateBeams();
+                        moves++;
+                        document.getElementById('moves-label').textContent = moves;
+                        showToast(`Rotated mirror at (${r.x+1}, ${r.y+1})`);
+                        if (puzzle.isVaultUnlocked() && !hasWon) {
+                            hasWon = true;
+                            audio.playBreach();
+                            onVictory();
+                        }
+                        break;
+                    }
+                }
+            }
+        });
+
+        document.getElementById('btn-share').addEventListener('click', () => {
+            const text = buildEmojiGrid();
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Daily puzzle score copied!');
+            }).catch(() => {
+                showToast('Clipboard access denied');
+            });
+        });
+
+        document.getElementById('btn-copy-reddit').addEventListener('click', () => {
+            const text = buildEmojiGrid();
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Reddit comment copied!');
+            });
+        });
+
+        document.getElementById('btn-close-modal').addEventListener('click', () => {
+            document.getElementById('victory-modal').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
