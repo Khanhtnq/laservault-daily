@@ -1,0 +1,8 @@
+name: laservault-daily
+version: 1.0.0
+description: "Deterministic Daily Seeded Laser-Optics Tactical Puzzle Game"
+permissions:
+  - redis
+  - media
+entry: src/main.tsx
+webroot: webroot
